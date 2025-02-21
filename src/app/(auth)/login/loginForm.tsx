@@ -1,5 +1,5 @@
-"use client";
 
+'use client'
 // import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,13 +14,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
-import envConfig from "@/config";
+// import envConfig from "@/config";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/app/context/AppContext";
 import authApiRequest from "@/apiRequest/auth";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
   const { toast } = useToast();
+  const router = useRouter()
   const {setSessionToken} = useAppContext()
   // 1. Define your form.
   const form = useForm<LoginBodyType>({
@@ -61,28 +63,31 @@ const LoginForm = () => {
         description: result.payload.message
       })
       
-    const resultFromNextServer = await fetch('/api/auth',{
-        method: 'POST',
-        body: JSON.stringify(result),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then(async (res) => {
-        const payload = await res.json();
-        const data = {
-          status: res.status,
-          payload
-        };
-        if (!res.ok) {
-          throw data;
-        }
-        return data;
-      })
-      toast({
-        description: result.payload.message
-      })
-      console.log(resultFromNextServer)
-      setSessionToken(resultFromNextServer.payload.data.token)
+      await authApiRequest.auth({sessionToken: result.payload.data.token})
+    // const resultFromNextServer = await 
+    // fetch('/api/auth',{
+    //     method: 'POST',
+    //     body: JSON.stringify(result),
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   }).then(async (res) => {
+    //     const payload = await res.json();
+    //     const data = {
+    //       status: res.status,
+    //       payload
+    //     };
+    //     if (!res.ok) {
+    //       throw data;
+    //     }
+    //     return data;
+    //   })
+      // toast({
+      //   description: result.payload.message
+      // })
+      console.log(result)
+      setSessionToken(result.payload.data.token)
+      router.push('/me')
    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

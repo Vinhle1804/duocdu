@@ -15,13 +15,19 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input" 
 import { RegisterBody, RegisterBodyType } from "@/schemaValidations/auth.schema"
-import envConfig from "@/config"
+// import envConfig from "@/config"
+import authApiRequest from "@/apiRequest/auth"
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation"
+import { useAppContext } from "@/app/context/AppContext"
 
 
 
 
 const RegisterForm = () => {
-  
+    const { toast } = useToast();
+    const router = useRouter()
+    const {setSessionToken} = useAppContext()
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
@@ -36,17 +42,29 @@ const RegisterForm = () => {
   
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
-  const result = await fetch(`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,{
-    method: 'POST',
-    body: JSON.stringify(values),
-    headers:{
-    'Content-Type': 'application/json'
+    try {
+      const result = await authApiRequest.register(values)
+  await authApiRequest.auth({sessionToken: result.payload.data.token})
+  toast({
+    description: result.payload.message
+  })
+  setSessionToken(result.payload.data.token)
+  router.push('/me')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+    } catch (error: any) {
+      toast({ description: "Đăng ký thất bại, vui lòng thử lại!", variant: "destructive" });
     }
-    
-  }).then((res) => res.json())
   
-    console.log(result)
+  // fetch(`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,{
+  //   method: 'POST',
+  //   body: JSON.stringify(values),
+  //   headers:{
+  //   'Content-Type': 'application/json'
+  //   }
+    
+  // }).then((res) => res.json())
   }
+  
 
   
   return (
