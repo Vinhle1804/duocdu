@@ -1,19 +1,69 @@
 import envConfig from "@/config";
+import { LoginResType } from "@/schemaValidations/auth.schema";
 
 type CustomOptions = Omit<RequestInit, "method"> & {
   baseUrl?: string | undefined;
 };
 
-class HttpError extends Error {
-  status: number;
-  payload: any;
+const ENTITY_ERRROR_STATUS = 422;
+type EntityErrorPayload = {
+  message: string;
+  errors: {
+    field: string;
+    message: string;
+  }[];
+};
 
+export class HttpError extends Error {
+  status: number;
+
+  payload: {
+    message: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor({ status, payload }: { status: number; payload: any }) {
     super("HttpError");
     this.status = status;
     this.payload = payload;
   }
 }
+
+export class EntityError extends HttpError {
+  status: 422;
+  payload: EntityErrorPayload;
+  constructor({
+    status,
+    payload,
+  }: {
+    status: 422;
+    payload: EntityErrorPayload;
+  }) {
+    super({
+      status: status,
+      payload,
+    });
+    this.status = status;
+    this.payload = payload;
+  }
+}
+
+class SessionToken {
+  private token = "";
+  get value() {
+    return this.token;
+  }
+  set value(token: string) {
+    //gọi ở server thì bị lỗi ok?
+    if (typeof window === undefined) {
+      throw new Error("Cannot set token on server side");
+    }
+    this.token = token;
+  }
+}
+export const clientSessionToken = new SessionToken();
 
 const request = async <Response>(
   method: "GET" | "PUT" | "POST" | "DELETE",
@@ -23,7 +73,12 @@ const request = async <Response>(
   const body = options?.body ? JSON.stringify(options.body) : undefined;
   const baseHeaders = {
     "Content-Type": "application/json",
+    Authorization: clientSessionToken.value
+      ? `Bearer ${clientSessionToken.value}`
+      : "",
   };
+
+  //nếu kh tuyền baseUrl( hoặc = undefine) thì lấy từ env, còn truyền vào '' thì gọi api đến server
   const baseUrl =
     options?.baseUrl === undefined
       ? envConfig.NEXT_PUBLIC_API_ENDPOINT
@@ -48,7 +103,21 @@ const request = async <Response>(
     payload,
   };
   if (!res.ok) {
-    throw new HttpError(data);
+    if (res.status === ENTITY_ERRROR_STATUS) {
+      throw new EntityError(
+        data as {
+          status: 422;
+          payload: EntityErrorPayload;
+        }
+      );
+    } else{
+      throw new HttpError(data)
+    }
+  }
+  if (["/auth/login", "/auth/register"].includes(url)) {
+    clientSessionToken.value = (payload as LoginResType).data.token;
+  } else if ("/auth/logout".includes(url)) {
+    clientSessionToken.value = "";
   }
   return data;
 };
@@ -62,6 +131,7 @@ const http = {
   },
   post<Response>(
     url: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     body: any,
     options?: Omit<CustomOptions, "body"> | undefined
   ) {
@@ -69,6 +139,7 @@ const http = {
   },
   put<Response>(
     url: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     body: any,
     options?: Omit<CustomOptions, "body"> | undefined
   ) {

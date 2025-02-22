@@ -1,15 +1,15 @@
 'use client'
 // import envConfig from "@/config";
 import { useEffect } from "react"
-import { useAppContext } from "../context/AppContext";
 import accountApiRequest from "@/apiRequest/account";
 
 
+
 export default function Profile() {
-  const {sessionToken} = useAppContext()  
+
   useEffect(()=>{
   const fetchRequest = async () => {
-    const result = await accountApiRequest.me(sessionToken)
+    const result = await accountApiRequest.meClient()
     // fetch(
     //   `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/account/me`,
     //   {
@@ -35,7 +35,7 @@ export default function Profile() {
   }
 fetchRequest()
 
-},[sessionToken])
+},[])
 
   return (
     <div>

@@ -19,15 +19,17 @@ import { RegisterBody, RegisterBodyType } from "@/schemaValidations/auth.schema"
 import authApiRequest from "@/apiRequest/auth"
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation"
-import { useAppContext } from "@/app/context/AppContext"
+import { clientSessionToken } from "@/lib/http"
+import { handleErrorApi } from "@/lib/utils"
+import { useState } from "react"
 
 
 
 
 const RegisterForm = () => {
+    const [loading, setLoading] = useState(false);
     const { toast } = useToast();
     const router = useRouter()
-    const {setSessionToken} = useAppContext()
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
@@ -42,17 +44,24 @@ const RegisterForm = () => {
   
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
+    if(loading) return
+    setLoading(true);
     try {
       const result = await authApiRequest.register(values)
   await authApiRequest.auth({sessionToken: result.payload.data.token})
   toast({
     description: result.payload.message
   })
-  setSessionToken(result.payload.data.token)
+  clientSessionToken.value = result.payload.data.token
   router.push('/me')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
     } catch (error: any) {
-      toast({ description: "Đăng ký thất bại, vui lòng thử lại!", variant: "destructive" });
+      handleErrorApi({
+           error,
+           setError: form.setError
+         })
+    }finally{
+      setLoading(false)
     }
   
   // fetch(`${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,{
