@@ -1,11 +1,15 @@
 import envConfig from "@/config";
 import { LoginResType } from "@/schemaValidations/auth.schema";
+import { normalizePath } from "./utils";
+import { redirect } from "next/navigation";
 
 type CustomOptions = Omit<RequestInit, "method"> & {
   baseUrl?: string | undefined;
 };
 
 const ENTITY_ERRROR_STATUS = 422;
+const AUTHENTICATION_ERROR_STATUS = 401;
+
 type EntityErrorPayload = {
   message: string;
   errors: {
@@ -63,7 +67,12 @@ class SessionToken {
     this.token = token;
   }
 }
+
+
 export const clientSessionToken = new SessionToken();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let clientLogoutRequest: null | Promise<any> = null;
+export const isClient = () => typeof window !== "undefined";
 
 const request = async <Response>(
   method: "GET" | "PUT" | "POST" | "DELETE",
@@ -110,14 +119,42 @@ const request = async <Response>(
           payload: EntityErrorPayload;
         }
       );
-    } else{
-      throw new HttpError(data)
+    } 
+    else if (res.status === AUTHENTICATION_ERROR_STATUS) {
+      if (typeof window !== "undefined") {
+        if (!clientLogoutRequest) {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            body: JSON.stringify({ force: true }),
+            headers: {
+              ...baseHeaders,
+            },
+          });
+          await clientLogoutRequest;
+          clientSessionToken.value = "";
+          // location.href = "/login";
+        } else {
+          const sessionToken = (options?.headers as any).Authorization.split(
+            "Bearer "
+          )[1];
+          redirect(`/logout?sessionToken=${sessionToken}`);
+        }
+      }
+    }
+     else {
+      throw new HttpError(data);
     }
   }
-  if (["/auth/login", "/auth/register"].includes(url)) {
-    clientSessionToken.value = (payload as LoginResType).data.token;
-  } else if ("/auth/logout".includes(url)) {
-    clientSessionToken.value = "";
+  if (isClient()) {
+    if (
+      ["auth/login", "auth/register"].some(
+        (item) => item === normalizePath(url)
+      )
+    ) {
+      clientSessionToken.value = (payload as LoginResType).data.token;
+    } else if ("auth/logout" === normalizePath(url)) {
+      clientSessionToken.value = "";
+    }
   }
   return data;
 };

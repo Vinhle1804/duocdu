@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   console.log("Dữ liệu request:", res);
   if (!sessionToken) {
     return Response.json(
-      { mesage: "kh nhận đc token" },
+      { message: "kh nhận đc token" },
       {
         status: 400,
       }
@@ -18,3 +18,4 @@ export async function POST(request: Request) {
     },
   });
 }
+
