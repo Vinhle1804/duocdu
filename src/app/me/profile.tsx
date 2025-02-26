@@ -40,7 +40,7 @@ fetchRequest()
   return (
     <div>
       Profile  <br/>
-      file này là client nên phải dùng useContext, server thì khoải
+      file này là client
     </div>
   )
 }

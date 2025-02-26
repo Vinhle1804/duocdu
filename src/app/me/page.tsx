@@ -7,7 +7,7 @@ export default async function MeProfile(){
     const cookieStore = await cookies()
     const sessionToken = cookieStore.get('sessionToken')
 
-    // const result = await accountApiRequest.me(sessionToken?.value ?? '')
+    const result = await accountApiRequest.me(sessionToken?.value ?? '')
     // fetch(
     //     `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/account/me`,
     //     {
@@ -32,8 +32,8 @@ export default async function MeProfile(){
       // console.log(result)
 
     return <div>
-      {/* xin chao {result.payload.data.name}
-     */}
+      xin chao {result.payload.data.name}
+    
       <Profile/>
      </div>
     

@@ -11,6 +11,7 @@ export default function Logout() {
     const searchParams = useSearchParams()
     const sessionToken = searchParams.get('sessionToken')
     useEffect(()=>{
+      console.log(123123)
 if(sessionToken === clientSessionToken.value){
     authApiRequest.logoutFromNextClientToNextServer(true).then(() => {
         router.push(`/login?redirectFrom=${pathname}`)
@@ -20,7 +21,7 @@ if(sessionToken === clientSessionToken.value){
   return (
   
     <div>
-      <div>page</div>
+     
     </div>
   )
 }
