@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import AppProvider from "./context/AppProvider";
 import { cookies } from "next/headers";
+import { SlideSession } from "@/components/slide-session";
 
 const inter = Inter({
   variable: "--font-geist-mono",
@@ -37,7 +38,9 @@ export default async function RootLayout({
         >
           <AppProvider
            initialSessionToken = {sessionToken?.value}
-          >{children}</AppProvider>
+          >{children}
+          <SlideSession/>
+          </AppProvider>
           
         </ThemeProvider>
       </body>

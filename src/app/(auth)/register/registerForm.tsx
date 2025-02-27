@@ -48,7 +48,7 @@ const RegisterForm = () => {
     setLoading(true);
     try {
       const result = await authApiRequest.register(values)
-  await authApiRequest.auth({sessionToken: result.payload.data.token})
+  await authApiRequest.auth({sessionToken: result.payload.data.token, expriresAt: result.payload.data.expiresAt})
   toast({
     description: result.payload.message
   })

@@ -57,7 +57,8 @@ export class EntityError extends HttpError {
 }
 
 class SessionToken {
-  private token = "";
+  private token = ""
+  private _expiresAt = new Date().toISOString()
   get value() {
     return this.token;
   }
@@ -68,6 +69,17 @@ class SessionToken {
     }
     this.token = token;
   }
+get expiresAt(){
+  return this._expiresAt
+}
+set expiresAt(expiresAt: string){
+      //gọi ở server thì bị lỗi ok?
+      if (typeof window === undefined) {
+        throw new Error("Cannot set token on server side");
+      }
+      this._expiresAt= expiresAt
+}
+
 }
 
 
@@ -134,12 +146,15 @@ const request = async <Response>(
           });
           await clientLogoutRequest;
           clientSessionToken.value = "";
+          //reset về giá trị này(kéo dài time token)
+          clientSessionToken.expiresAt= new Date().toISOString()
      
           clientLogoutRequest = null
           // location.href = "/login";
         } 
       }
       else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sessionToken = (options?.headers as any).Authorization.split(
           "Bearer "
         )[1];
@@ -159,8 +174,10 @@ const request = async <Response>(
       )
     ) {
       clientSessionToken.value = (payload as LoginResType).data.token;
+      clientSessionToken.expiresAt = (payload as LoginResType).data.expiresAt
     } else if ("auth/logout" === normalizePath(url)) {
       clientSessionToken.value = "";
+      clientSessionToken.expiresAt = new Date().toISOString()
     }
   }
   return data;

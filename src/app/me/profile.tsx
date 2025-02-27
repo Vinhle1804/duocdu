@@ -31,7 +31,7 @@ export default function Profile() {
     //   }
     //   return data;
     // })
-    console.log(result) 
+    console.log("me"+result) 
   }
 fetchRequest()
 

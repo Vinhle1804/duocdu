@@ -15,7 +15,7 @@ if(authPaths.some(path => pathname.startsWith(path)) && sessionToken){
   return NextResponse.redirect(new URL('/me', request.url))
 }
 
-console.log(sessionToken)
+
 return NextResponse.next()
 
 }

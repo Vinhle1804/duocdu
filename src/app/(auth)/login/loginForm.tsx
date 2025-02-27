@@ -64,7 +64,7 @@ const LoginForm = () => {
         description: result.payload.message,
       });
 
-      await authApiRequest.auth({ sessionToken: result.payload.data.token });
+      await authApiRequest.auth({ sessionToken: result.payload.data.token, expriresAt: result.payload.data.expiresAt });
       // const resultFromNextServer = await
       // fetch('/api/auth',{
       //     method: 'POST',
