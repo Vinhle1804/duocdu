@@ -93,23 +93,25 @@ const request = async <Response>(
   url: string,
   options?: CustomOptions | undefined
 ) => {
-  const body = options?.body ? JSON.stringify(options.body) : undefined;
-  const baseHeaders = {
-    "Content-Type": "application/json",
+  let body = options?.body
+  const baseHeaders: Record<string, string> = {
     Authorization: clientSessionToken.value
       ? `Bearer ${clientSessionToken.value}`
       : "",
   };
 
-  //nếu kh tuyền baseUrl( hoặc = undefine) thì lấy từ env, còn truyền vào '' thì gọi api đến server
+  // Nếu body không phải FormData, chuyển thành JSON và đặt Content-Type
+  if (body && !(body instanceof FormData)) {
+    body = JSON.stringify(body);
+    baseHeaders["Content-Type"] = "application/json";
+  }
+
   const baseUrl =
     options?.baseUrl === undefined
       ? envConfig.NEXT_PUBLIC_API_ENDPOINT
       : options.baseUrl;
 
-  const fullUrl = url.startsWith("/")
-    ? `${baseUrl}${url}`
-    : `${baseUrl}/${url}`;
+  const fullUrl = url.startsWith("/") ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 
   const res = await fetch(fullUrl, {
     ...options,
@@ -120,68 +122,49 @@ const request = async <Response>(
     body,
     method,
   });
+
   const payload: Response = await res.json();
-  const data = {
-    status: res.status,
-    payload,
-  };
+  const data = { status: res.status, payload };
+
   if (!res.ok) {
     if (res.status === ENTITY_ERRROR_STATUS) {
-      throw new EntityError(
-        data as {
-          status: 422;
-          payload: EntityErrorPayload;
-        }
-      );
-    } 
-    else if (res.status === AUTHENTICATION_ERROR_STATUS) {
+      throw new EntityError(data as { status: 422; payload: EntityErrorPayload });
+    } else if (res.status === AUTHENTICATION_ERROR_STATUS) {
       if (typeof window !== "undefined") {
         if (!clientLogoutRequest) {
           await fetch("/api/auth/logout", {
             method: "POST",
             body: JSON.stringify({ force: true }),
-            headers: {
-              ...baseHeaders,
-            },
+            headers: { ...baseHeaders },
           });
           await clientLogoutRequest;
           clientSessionToken.value = "";
-          //reset về giá trị này(kéo dài time token)
-          clientSessionToken.expiresAt= new Date().toISOString()
-     
-          clientLogoutRequest = null
-          // location.href = "/login";
-        } 
-      }
-      else {
+          clientSessionToken.expiresAt = new Date().toISOString();
+          clientLogoutRequest = null;
+        }
+      } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sessionToken = (options?.headers as any).Authorization.split(
-          "Bearer "
-        )[1];
+        const sessionToken = (options?.headers as any)?.Authorization?.split("Bearer ")[1];
         redirect(`/logout?sessionToken=${sessionToken}`);
       }
-    }
-
-
-     else {
+    } else {
       throw new HttpError(data);
     }
   }
+
   if (isClient()) {
-    if (
-      ["auth/login", "auth/register"].some(
-        (item) => item === normalizePath(url)
-      )
-    ) {
+    if (["auth/login", "auth/register"].some((item) => item === normalizePath(url))) {
       clientSessionToken.value = (payload as LoginResType).data.token;
-      clientSessionToken.expiresAt = (payload as LoginResType).data.expiresAt
+      clientSessionToken.expiresAt = (payload as LoginResType).data.expiresAt;
     } else if ("auth/logout" === normalizePath(url)) {
       clientSessionToken.value = "";
-      clientSessionToken.expiresAt = new Date().toISOString()
+      clientSessionToken.expiresAt = new Date().toISOString();
     }
   }
+
   return data;
 };
+
 
 const http = {
   get<Response>(
