@@ -6,7 +6,7 @@ export default async function ProductEdit({
 }: {
   params: { id: string };
 }) {
-  let product = null;
+  let product = undefined
   try {
     const { payload } = await productApiRequest.getDetail(Number(params.id));
     product = payload.data;
@@ -18,7 +18,7 @@ export default async function ProductEdit({
   return (
     <div>
       {!product && <div>kh tìm thấy sp</div>}
-    <ProductAddForm/>
+    {product&& <ProductAddForm product={product}/>}
     </div>
   );
 }

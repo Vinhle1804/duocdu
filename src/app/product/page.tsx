@@ -9,14 +9,14 @@ export default async function ProductList() {
   const productList = payload.payload.data
   return (
     <div className='space-y-3'>
-      <Link href={'product/add'}><Button variant={'secondary'}>Thêm sản ph</Button></Link>
+      <Link href={'product/add'}><Button variant={'secondary'}>Thêm sản phẩm</Button></Link>
       <h1>Product List</h1>
       <div className='space-y-5'>
       <ul>
         {productList.map((product) => (
-          <li key={product.id} className='flex space-x-4'>
+          <li key={product.id} className='flex justify-center'>
             <div>
-              <Image src={product.image} alt={product.name} width={100} height={100} className='w-32 h-32 object-cover' />
+              <Image src={product.image} alt={product.name} width={200} height={200} />
               <h3>{product.name}</h3>
               <div>{product.price}</div>
               <div className='flex space-x-2'>
