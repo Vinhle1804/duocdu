@@ -30,20 +30,30 @@ const authApiRequest = {
     http.post<MessageResType>(
       "api/auth/logout",
       {
-        force
+        force,
       },
       {
         baseUrl: "",
       }
     ),
-    slideSessionFromNextServerToServer: (sessionToken: string) => http.post<SlideSessionResType>('/auth/slide-session',{},{
-      headers:{
-        Authorization: `Bearer ${sessionToken}`
+  slideSessionFromNextServerToServer: (sessionToken: string) =>
+    http.post<SlideSessionResType>(
+      "/auth/slide-session",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
       }
-    }),
-    slideSessionFromNextClientToNextServer: ()=>http.post<SlideSessionResType>('/api/auth/slide-session',{},{
-      baseUrl: ''
-    })
+    ),
+  slideSessionFromNextClientToNextServer: () =>
+    http.post<SlideSessionResType>(
+      "/api/auth/slide-session",
+      {},
+      {
+        baseUrl: "",
+      }
+    ),
 };
 
 export default authApiRequest;

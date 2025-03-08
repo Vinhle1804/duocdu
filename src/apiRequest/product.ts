@@ -1,4 +1,5 @@
 import http from "@/lib/http";
+import { MessageResType } from "@/schemaValidations/common.schema";
 import {
   CreateProductBodyType,
   ProductListResType,
@@ -19,6 +20,7 @@ export const productApiRequest = {
       data: string
     }>('/media/upload', body),
   update: (id: number, body: UpdateProductBodyType) => http.put<ProductResType>(`/products/${id}`,body),
+  delete: (id: number) => http.delete<MessageResType>(`/products/${id}`)
 
 };
 export default productApiRequest;

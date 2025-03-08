@@ -36,7 +36,7 @@ const LoginForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: LoginBodyType) {
-    if(loading) return
+    if (loading) return;
     setLoading(true);
     try {
       const result = await authApiRequest.login(values);
@@ -64,7 +64,10 @@ const LoginForm = () => {
         description: result.payload.message,
       });
 
-      await authApiRequest.auth({ sessionToken: result.payload.data.token, expriresAt: result.payload.data.expiresAt });
+      await authApiRequest.auth({
+        sessionToken: result.payload.data.token,
+        expriresAt: result.payload.data.expiresAt,
+      });
       // const resultFromNextServer = await
       // fetch('/api/auth',{
       //     method: 'POST',
@@ -96,8 +99,8 @@ const LoginForm = () => {
         error,
         setError: form.setError,
       });
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   }
 

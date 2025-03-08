@@ -1,17 +1,14 @@
 'use client'
-import ButtonLogout from "@/components/buttonLogout";
-import { ModeToggle } from "@/components/toggle-theme";
 
-
+import { useAppContext } from "../context/AppProvider";
 
 export default function Home() {
+  const { user } = useAppContext();
+  console.log(user);
+
   return (
- <div>
-  <h1>HomePage</h1>
-  <ModeToggle/>
-  <ButtonLogout/>
-
-
- </div>
+    <div>
+      <h1>HomePage</h1>
+    </div>
   );
 }

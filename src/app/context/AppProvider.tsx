@@ -1,23 +1,23 @@
 "use client";
 import { clientSessionToken } from "@/lib/http";
-import { createContext,useState} from "react";
+import { AccountResType } from "@/schemaValidations/account.schema";
+import { createContext, useContext, useState } from "react";
+export type User = AccountResType["data"];
 
-// const AppContext = createContext({
-//   sessionToken: "",
-// });
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const AppContext = createContext({
-  // sessionToken: string;
-  // setSessionToken: (token: string) => void;
-})
+const currentUser = JSON.parse(localStorage.getItem("__user") ?? "{}");
 
-// export const useAppContext = () => {
-//   const context = useContext(AppContext);
-//   if (!context) {
-//     throw new Error("useAppContext must be used within an APpProvider");
-//   }
-//   return context;
-// };
+const AppContext = createContext<{
+  user: User;
+  setUser: (user: User) => void;
+}>({
+  user: currentUser,
+  setUser: () => {},
+});
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  return context;
+};
 
 export default function AppProvider({
   children,
@@ -25,13 +25,19 @@ export default function AppProvider({
 }: {
   children: React.ReactNode;
   initialSessionToken?: string;
+  user: User | null;
 }) {
-useState(()=>{
-  clientSessionToken.value = initialSessionToken
-})
+  const [user, _setUser] = useState<User>(currentUser);
+  useState(() => {
+    clientSessionToken.value = initialSessionToken;
+  });
+  const setUser = (updateUser: User) => {
+    localStorage.setItem("__user", JSON.stringify(updateUser));
+    _setUser(user);
+  };
   return (
- 
-    <>{children}</>  
-  
+    <AppContext.Provider value={{ user, setUser }}>
+      {children}
+    </AppContext.Provider>
   );
 }
