@@ -18,5 +18,6 @@ export default function Logout() {
       });
     }
   }, [sessionToken, router, pathname]);
+  
   return <div></div>;
 }

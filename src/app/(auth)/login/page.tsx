@@ -4,7 +4,7 @@ import LoginForm from "./loginForm"
 
 
 
-const RegisterPage = () => {
+const LoginPage = () => {
 
 
 
@@ -19,4 +19,4 @@ const RegisterPage = () => {
   )
 }
 
-export default RegisterPage
+export default LoginPage

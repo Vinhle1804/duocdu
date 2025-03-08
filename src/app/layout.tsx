@@ -7,6 +7,9 @@ import AppProvider from "./context/AppProvider";
 import { cookies } from "next/headers";
 import { SlideSession } from "@/components/slide-session";
 import Header from "@/components/header";
+import accountApiRequest from "@/apiRequest/account";
+import { AccountResType } from "@/schemaValidations/account.schema";
+
 
 const inter = Inter({
   variable: "--font-geist-mono",
@@ -24,26 +27,30 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies(); // Thêm 'await' để lấy dữ liệu cookies
-  const sessionToken = cookieStore.get('sessionToken')
+  const sessionToken = cookieStore.get("sessionToken");
+  let user: AccountResType['data'] | null = null
+  if(sessionToken){
+    const data = await accountApiRequest.me(sessionToken.value)
+    user = data.payload.data
+  }
 
-  
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={` ${inter.variable} antialiased`}>
-        <Toaster/>
+        <Toaster />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <AppProvider
-           initialSessionToken = {sessionToken?.value}
-          ><Header/>
+          <AppProvider initialSessionToken={sessionToken?.value} user={user}>
+      
+            <Header user = {user}/>
             {children}
-          <SlideSession/>
+            <SlideSession />
+         
           </AppProvider>
-          
         </ThemeProvider>
       </body>
     </html>

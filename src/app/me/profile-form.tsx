@@ -19,9 +19,11 @@ import { useRouter } from "next/navigation";
 import { handleErrorApi } from "@/lib/utils";
 import { useState } from "react";
 
+
 type Profile = AccountResType['data']
 
 const ProfileForm = ({ profile }: { profile: Profile }) => {
+
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -34,11 +36,13 @@ const ProfileForm = ({ profile }: { profile: Profile }) => {
   });
 
   async function onSubmit(values: UpdateMeBodyType) {
-    if (loading) return;
-    setLoading(true);
+    if (loading) return
+    setLoading(true)
     try {
-      const result = await accountApiRequest.updateMe(values);
-      toast({ description: result.payload.message });
+      const result = await accountApiRequest.updateMe(values)
+      toast({ description: result.payload.message })
+     
+    
       router.refresh()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
