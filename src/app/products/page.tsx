@@ -5,9 +5,9 @@ import Link from "next/link";
 import DeleteProduct from "./_components/delete-product";
 import { cookies } from "next/headers";
 
-export default async function ProductList() {
+export default async function ProductListPage() {
   const cookieStore = cookies();
-  const sessionToken = (await cookieStore).get("sesionToken");
+  const sessionToken = (await cookieStore).get("sessionToken");
   const isAuthenticated = Boolean(sessionToken);
   const payload = await productApiRequest.getList();
   const productList = payload.payload.data;
@@ -15,7 +15,7 @@ export default async function ProductList() {
     <div className="space-y-3">
       <h1>Product List</h1>
       {isAuthenticated && (
-        <Link href={"product/add"}>
+        <Link href={"products/add"}>
           <Button variant={"secondary"}>Thêm sản phẩm</Button>
         </Link>
       )}
@@ -24,17 +24,20 @@ export default async function ProductList() {
           {productList.map((product) => (
             <li key={product.id} className="flex justify-center">
               <div>
-                <Image
+                <Link href={`/products/${product.id}`}>
+                   <Image
                   src={product.image}
                   alt={product.name}
                   width={200}
                   height={200}
                 />
+                </Link>
+             
                 <h3>{product.name}</h3>
                 <div>{product.price}</div>
                 {isAuthenticated && (
                   <div className="flex space-x-2">
-                    <Link href={`/product/${product.id}`}>
+                    <Link href={`/products/${product.id}/edit`}>
                       <Button variant={"outline"}>Edit</Button>
                     </Link>
 

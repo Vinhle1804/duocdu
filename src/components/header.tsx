@@ -16,7 +16,7 @@ export default function Header({user}:{
       <ModeToggle />
       <ul>
         <li>
-          <Link href={"/product"}>Product</Link> <br />
+          <Link href={"/products"}>Product</Link> <br />
         </li>
         {user ? (
           <>

@@ -3,6 +3,14 @@ import { cookies } from "next/headers";
 import Profile from "./profile";
 import accountApiRequest from "@/apiRequest/account";
 import ProfileForm from "./profile-form";
+import type { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: 'hồ sơ ng dùng'
+  // openGraph: baseOpenGraph
+}
+
 
 export default async function MeProfile(){
     const cookieStore = await cookies()
